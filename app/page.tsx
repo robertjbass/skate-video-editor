@@ -3,7 +3,9 @@ import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [dragActive, setDragActive] = useState<Boolean>(false);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string>();
+
   const timelineHeight = 200;
 
   const handleDrag = (e: any) => {
@@ -17,7 +19,12 @@ export default function Home() {
   };
 
   const handleFileDrop = (e: any) => {
-    setFiles(e.target.files);
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.target.files) {
+      const droppedFiles: File[] = Array.from(e.target.files);
+      setFiles(droppedFiles);
+    }
     setDragActive(false);
   };
 
@@ -65,9 +72,14 @@ export default function Home() {
 
           {files && (
             <div>
-              {Array.from(files).map((file: File, index: number) => {
-                return <div key={index}>{file.name}</div>;
-              })}
+              {files.map((file: File) => (
+                <div
+                  onClick={() => setVideoUrl(URL.createObjectURL(file))}
+                  key={file.name}
+                >
+                  {file.name}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -76,7 +88,12 @@ export default function Home() {
           className="flex flex-grow bg-red-200 align-middle justify-center p-8"
         >
           <div id="video" className="bg-black w-full">
-            video
+            <video
+              id="video-player"
+              src={videoUrl}
+              className="w-full"
+              controls={true}
+            />
           </div>
         </div>
       </div>
